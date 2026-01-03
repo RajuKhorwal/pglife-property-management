@@ -4,19 +4,8 @@ const Interested = require("../models/Interested");
 const Property = require("../models/Property");
 const auth = require("../middleware/auth");
 const User = require("../models/User");
-const multer = require("multer");
-const path = require("path");
 const router = express.Router();
-
-// storage config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/avatars");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // unique filename
-  },
-});
+const uploadAvatar = require("../middlewares/uploadAvatar");
 
 const upload = multer({ storage });
 
@@ -96,13 +85,17 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
-router.put("/:id/avatar", auth, upload.single("avatar"), async (req, res) => {
+router.put("/:id/avatar", auth, uploadAvatar.single("avatar"), async (req, res) => {
   try {
     const { id } = req.params;
 
     // Ensure logged-in user is only updating their own profile
     if (req.user._id.toString() !== id.toString()) {
       return res.status(403).json({ success: false, message: "Access denied" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
     }
 
     const user = await User.findById(id);
@@ -113,7 +106,7 @@ router.put("/:id/avatar", auth, upload.single("avatar"), async (req, res) => {
     }
 
     // Save avatar URL
-    user.avatar_url = `/uploads/avatars/${req.file.filename}`;
+    user.avatar_url = req.file.path; 
     await user.save();
 
     res.json({
@@ -125,9 +118,7 @@ router.put("/:id/avatar", auth, upload.single("avatar"), async (req, res) => {
         email: user.email,
         phone: user.phone,
         college_name: user.college_name,
-        avatar_url: user.avatar_url
-          ? `${process.env.REACT_APP_BACKEND_URL}${user.avatar_url}`
-          : null,
+        avatar_url: user.avatar_url,
         isAdmin: user.isAdmin,
       },
     });

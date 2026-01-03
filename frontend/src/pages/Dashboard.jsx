@@ -2,7 +2,17 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Container, Row, Col, Button, Breadcrumb } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
-import { FaUser, FaHeart, FaEdit, FaEnvelope, FaPhone, FaUniversity, FaMapMarkerAlt, FaStar, FaStarHalfAlt } from "react-icons/fa";
+import {
+  FaUser,
+  FaHeart,
+  FaEdit,
+  FaEnvelope,
+  FaPhone,
+  FaUniversity,
+  FaMapMarkerAlt,
+  FaStar,
+  FaStarHalfAlt,
+} from "react-icons/fa";
 import { Modal, Form } from "react-bootstrap";
 import { AuthContext } from "../context/AuthContext";
 import { AppContext } from "../context/AppContext";
@@ -10,9 +20,12 @@ import { AppContext } from "../context/AppContext";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, setUser, token, authLoading } = useContext(AuthContext);
-  const { interestedProperties, setInterestedProperties } = useContext(AppContext);
+  const { interestedProperties, setInterestedProperties } =
+    useContext(AppContext);
   const [showEdit, setShowEdit] = useState(false);
-  const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
+  const API_BASE =
+    "https://pglife-property-management-backend.onrender.com" ||
+    "http://localhost:5000";
   const [form, setForm] = useState({
     full_name: "",
     phone: "",
@@ -20,11 +33,10 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    if(!authLoading && (!user || !token)) {
+    if (!authLoading && (!user || !token)) {
       navigate("/");
     }
   }, [authLoading, user, token, navigate]);
-
 
   useEffect(() => {
     if (user) {
@@ -54,14 +66,11 @@ export default function Dashboard() {
       const formData = new FormData();
       formData.append("avatar", form.avatarFile);
 
-      const res = await fetch(
-        `${API_BASE}/api/users/${user._id}/avatar`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        }
-      );
+      const res = await fetch(`${API_BASE}/api/users/${user._id}/avatar`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
       const data = await res.json();
       if (data.success) {
         setUser(data.user);
@@ -123,7 +132,6 @@ export default function Dashboard() {
   }
 
   if (!user) return null;
-
 
   return (
     <>
@@ -571,7 +579,10 @@ export default function Dashboard() {
           {/* Profile Section */}
           <div className="profile-section">
             <h2 className="section-title">My Profile</h2>
-            <button className="edit-profile-button" onClick={() => setShowEdit(true)}>
+            <button
+              className="edit-profile-button"
+              onClick={() => setShowEdit(true)}
+            >
               <FaEdit /> Edit Profile
             </button>
 
@@ -581,13 +592,7 @@ export default function Dashboard() {
                   <div className="profile-avatar-container">
                     {user.avatar_url ? (
                       <img
-                        src={
-                          user?.avatar_url
-                            ? user.avatar_url.startsWith("http")
-                              ? user.avatar_url
-                              : `${API_BASE}${user.avatar_url}`
-                            : "/img/fallback.png"
-                        }
+                        src={user?.avatar_url || "/img/fallback.png"}
                         alt="Profile"
                         className="profile-avatar"
                       />
@@ -602,7 +607,7 @@ export default function Dashboard() {
                 <Col lg={9} md={8}>
                   <div className="profile-info">
                     <div className="profile-name">{user.full_name}</div>
-                    
+
                     <div className="profile-detail">
                       <div className="profile-icon">
                         <FaEnvelope />
@@ -626,7 +631,8 @@ export default function Dashboard() {
                         <FaUniversity />
                       </div>
                       <div>
-                        <strong>College:</strong> {user.college_name || "Not provided"}
+                        <strong>College:</strong>{" "}
+                        {user.college_name || "Not provided"}
                       </div>
                     </div>
                   </div>
@@ -664,9 +670,12 @@ export default function Dashboard() {
 
                     let genderImg = "/img/unisex.png";
                     if (property.gender === "male") genderImg = "/img/male.png";
-                    else if (property.gender === "female") genderImg = "/img/female.png";
+                    else if (property.gender === "female")
+                      genderImg = "/img/female.png";
 
-                    const propertyImages = property.images || ["/img/fallback.png"];
+                    const propertyImages = property.images || [
+                      "/img/fallback.png",
+                    ];
 
                     return (
                       <Col lg={6} key={property._id}>
@@ -684,7 +693,9 @@ export default function Dashboard() {
                                   else if (totalRating >= i + 0.3)
                                     return <FaStarHalfAlt key={i} />;
                                   else
-                                    return <i key={i} className="far fa-star"></i>;
+                                    return (
+                                      <i key={i} className="far fa-star"></i>
+                                    );
                                 })}
                               </div>
                               <FaHeart
@@ -707,11 +718,15 @@ export default function Dashboard() {
                                 <div className="property-rent">
                                   ₹ {property.rent.toLocaleString()}
                                 </div>
-                                <div className="property-rent-unit">per month</div>
+                                <div className="property-rent-unit">
+                                  per month
+                                </div>
                               </div>
                               <Button
                                 className="view-button"
-                                onClick={() => navigate(`/property_detail/${property._id}`)}
+                                onClick={() =>
+                                  navigate(`/property_detail/${property._id}`)
+                                }
                               >
                                 View Details
                               </Button>
@@ -728,7 +743,12 @@ export default function Dashboard() {
       </div>
 
       {/* Edit Profile Modal */}
-      <Modal show={showEdit} onHide={() => setShowEdit(false)} className="edit-modal" centered>
+      <Modal
+        show={showEdit}
+        onHide={() => setShowEdit(false)}
+        className="edit-modal"
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Edit Profile</Modal.Title>
         </Modal.Header>
@@ -739,7 +759,9 @@ export default function Dashboard() {
               <Form.Control
                 type="text"
                 value={form.full_name}
-                onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, full_name: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -755,7 +777,9 @@ export default function Dashboard() {
               <Form.Control
                 type="text"
                 value={form.college_name}
-                onChange={(e) => setForm({ ...form, college_name: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, college_name: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -763,7 +787,9 @@ export default function Dashboard() {
               <Form.Control
                 type="file"
                 accept="image/*"
-                onChange={(e) => setForm({ ...form, avatarFile: e.target.files[0] })}
+                onChange={(e) =>
+                  setForm({ ...form, avatarFile: e.target.files[0] })
+                }
               />
             </Form.Group>
           </Form>
