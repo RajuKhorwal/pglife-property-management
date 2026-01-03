@@ -40,9 +40,7 @@ router.put("/:id", async (req, res) => {
         email: user.email, // keep email non-editable
         phone: user.phone,
         college_name: user.college_name,
-        avatar_url: user.avatar_url
-          ? `${process.env.REACT_APP_BACKEND_URL}${user.avatar_url}`
-          : null,
+        avatar_url: user.avatar_url,
         isAdmin: user.isAdmin,
       },
     });
@@ -72,9 +70,7 @@ router.get("/:id", auth, async (req, res) => {
         email: user.email,
         phone: user.phone,
         college_name: user.college_name,
-        avatar_url: user.avatar_url
-          ? `${process.env.REACT_APP_BACKEND_URL}${user.avatar_url}`
-          : null,
+        avatar_url: user.avatar_url,
         isAdmin: user.isAdmin,
       },
     });
