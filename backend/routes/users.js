@@ -5,7 +5,7 @@ const Property = require("../models/Property");
 const auth = require("../middleware/auth");
 const User = require("../models/User");
 const router = express.Router();
-const uploadAvatar = require("../middlewares/uploadAvatar");
+const uploadAvatar = require("../middleware/uploadAvatar");
 
 const upload = multer({ storage });
 
