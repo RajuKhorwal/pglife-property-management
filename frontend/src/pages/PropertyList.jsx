@@ -38,6 +38,7 @@ export default function PropertyList() {
   } = useContext(AppContext);
 
   const { user, token, logoutOnExpire } = useContext(AuthContext);
+  const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
 
   useEffect(() => {
     if (!city) return;
@@ -96,7 +97,7 @@ export default function PropertyList() {
     try {
       const method = userInterested ? "delete" : "post";
       await fetch(
-        `http://localhost:5000/api/properties/${propertyId}/interested`,
+        `${API_BASE}/api/properties/${propertyId}/interested`,
         {
           method,
           headers: { Authorization: `Bearer ${token}` },

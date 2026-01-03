@@ -12,6 +12,7 @@ export default function Dashboard() {
   const { user, setUser, token } = useContext(AuthContext);
   const { interestedProperties, setInterestedProperties } = useContext(AppContext);
   const [showEdit, setShowEdit] = useState(false);
+  const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
   const [form, setForm] = useState({
     full_name: "",
     phone: "",
@@ -27,7 +28,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (user) {
-      fetch(`http://localhost:5000/api/users/${user._id}/interested`, {
+      fetch(`${API_BASE}/api/users/${user._id}/interested`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
@@ -54,7 +55,7 @@ export default function Dashboard() {
       formData.append("avatar", form.avatarFile);
 
       const res = await fetch(
-        `http://localhost:5000/api/users/${user._id}/avatar`,
+        `${API_BASE}/api/users/${user._id}/avatar`,
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` },
@@ -69,7 +70,7 @@ export default function Dashboard() {
     }
 
     // update text fields
-    const res = await fetch(`http://localhost:5000/api/users/${user._id}`, {
+    const res = await fetch(`${API_BASE}/api/users/${user._id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -94,7 +95,7 @@ export default function Dashboard() {
     const token = localStorage.getItem("token");
     try {
       const res = await fetch(
-        `http://localhost:5000/api/properties/${propertyId}/interested`,
+        `${API_BASE}/api/properties/${propertyId}/interested`,
         {
           method: "DELETE",
           headers: {
@@ -579,7 +580,7 @@ export default function Dashboard() {
                           user?.avatar_url
                             ? user.avatar_url.startsWith("http")
                               ? user.avatar_url
-                              : `http://localhost:5000${user.avatar_url}`
+                              : `${API_BASE}${user.avatar_url}`
                             : "/img/fallback.png"
                         }
                         alt="Profile"

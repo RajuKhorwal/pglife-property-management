@@ -7,7 +7,7 @@ import { FaBuilding, FaEdit, FaTrash, FaPlus, FaMapMarkerAlt, FaRupeeSign, FaIma
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
 
 export default function AdminProperties() {
   const { tokenHeader } = useContext(AuthContext);
@@ -33,7 +33,7 @@ export default function AdminProperties() {
 
   const fetchProperties = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/admin/properties`, {
+      const res = await axios.get(`${API_BASE}/api/admin/properties`, {
         headers: tokenHeader,
       });
       setProperties(res.data.properties || []);
@@ -98,7 +98,7 @@ export default function AdminProperties() {
       let res;
       if (editingProperty) {
         res = await axios.put(
-          `${API_BASE}/admin/properties/${editingProperty._id}`,
+          `${API_BASE}/api/admin/properties/${editingProperty._id}`,
           form,
           {
             headers: {
@@ -114,7 +114,7 @@ export default function AdminProperties() {
         );
         toast.success("Property updated successfully ✅");
       } else {
-        res = await axios.post(`${API_BASE}/admin/properties`, form, {
+        res = await axios.post(`${API_BASE}/api/admin/properties`, form, {
           headers: {
             ...tokenHeader,
             "Content-Type": "multipart/form-data",
@@ -136,7 +136,7 @@ export default function AdminProperties() {
       return;
 
     try {
-      await axios.delete(`${API_BASE}/admin/properties/${id}`, {
+      await axios.delete(`${API_BASE}/api/admin/properties/${id}`, {
         headers: tokenHeader,
       });
       setProperties(properties.filter((p) => p._id !== id));
@@ -150,7 +150,7 @@ export default function AdminProperties() {
   const handleRowClick = async (property) => {
     try {
       const res = await axios.get(
-        `${API_BASE}/admin/properties/${property._id}`,
+        `${API_BASE}/api/admin/properties/${property._id}`,
         {
           headers: tokenHeader,
         }
@@ -166,7 +166,7 @@ export default function AdminProperties() {
 
   const getImageUrl = (img) => {
     if (img.startsWith("/uploads")) {
-      return `http://localhost:5000${img}`;
+      return `${API_BASE}${img}`;
     }
     return img;
   };

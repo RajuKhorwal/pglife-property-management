@@ -6,7 +6,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext";
 
-const API_BASE = "http://localhost:5000/api/admin";
+const API_BASE = "https://pglife-property-management-backend.onrender.com/api/admin" || "http://localhost:5000/api/admin";
 
 export default function AdminUsers() {
   const { tokenHeader } = useContext(AuthContext);

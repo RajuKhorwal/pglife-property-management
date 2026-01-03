@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../context/AuthContext";
 import { AppContext } from "../context/AppContext";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
 
 export default function Booking() {
   const { id } = useParams(); // property ID
@@ -40,7 +40,7 @@ export default function Booking() {
 
   const fetchPropertyDetails = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/properties/${id}`);
+      const res = await axios.get(`${API_BASE}/api/properties/${id}`);
       setProperty(res.data.property);
     } catch (err) {
       console.error("Error fetching property:", err);
@@ -76,7 +76,7 @@ export default function Booking() {
       };
 
       const res = await axios.post(
-        `${API_BASE}/bookings`,
+        `${API_BASE}/api/bookings`,
         bookingData,
         { headers: tokenHeader }
       );
@@ -445,7 +445,7 @@ export default function Booking() {
                   <img
                     src={
                       property.images[0].startsWith("/uploads")
-                        ? `http://localhost:5000${property.images[0]}`
+                        ? `${API_BASE}${property.images[0]}`
                         : property.images[0]
                     }
                     alt={property.name}

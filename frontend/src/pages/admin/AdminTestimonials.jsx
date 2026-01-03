@@ -6,7 +6,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext";
 
-const API_BASE = "http://localhost:5000/api/admin";
+const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
 
 export default function AdminTestimonials() {
   const { tokenHeader } = useContext(AuthContext);
@@ -35,8 +35,8 @@ export default function AdminTestimonials() {
     setLoading(true);
     try {
       const [tRes, pRes] = await Promise.all([
-        axios.get(`${API_BASE}/testimonials`, { headers: tokenHeader }),
-        axios.get(`${API_BASE}/properties`, { headers: tokenHeader }),
+        axios.get(`${API_BASE}/api/admin/testimonials`, { headers: tokenHeader }),
+        axios.get(`${API_BASE}/api/admin/properties`, { headers: tokenHeader }),
       ]);
       setTestimonials(tRes.data.testimonials || []);
       setProperties(pRes.data.properties || []);
@@ -65,7 +65,7 @@ export default function AdminTestimonials() {
   const updateStatus = async (id, status) => {
     try {
       const res = await axios.put(
-        `${API_BASE}/testimonials/${id}`,
+        `${API_BASE}/api/admin/testimonials/${id}`,
         { status },
         { headers: tokenHeader }
       );
@@ -82,7 +82,7 @@ export default function AdminTestimonials() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this testimonial?")) return;
     try {
-      await axios.delete(`${API_BASE}/testimonials/${id}`, {
+      await axios.delete(`${API_BASE}/api/admin/testimonials/${id}`, {
         headers: tokenHeader,
       });
       setTestimonials((prev) => prev.filter((t) => t._id !== id));
@@ -101,7 +101,7 @@ export default function AdminTestimonials() {
     }
     try {
       const res = await axios.post(
-        `${API_BASE}/properties/${propertyId}/testimonials`,
+        `${API_BASE}/api/admin/properties/${propertyId}/testimonials`,
         { user_name, content },
         { headers: tokenHeader }
       );
@@ -118,7 +118,7 @@ export default function AdminTestimonials() {
   const handleSaveEdit = async () => {
     try {
       const res = await axios.put(
-        `${API_BASE}/testimonials/${selected._id}`,
+        `${API_BASE}/api/admin/testimonials/${selected._id}`,
         editData,
         { headers: tokenHeader }
       );
@@ -709,7 +709,7 @@ export default function AdminTestimonials() {
                       <div className="user-info">
                         {t.user?.avatar_url ? (
                           <img
-                            src={`http://localhost:5000${t.user.avatar_url}`}
+                            src={`${API_BASE}${t.user.avatar_url}`}
                             alt="avatar"
                             className="user-avatar"
                           />
@@ -891,7 +891,7 @@ export default function AdminTestimonials() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             {selected.user?.avatar_url && (
                               <img
-                                src={`http://localhost:5000${selected.user.avatar_url}`}
+                                src={`${API_BASE}${selected.user.avatar_url}`}
                                 alt="avatar"
                                 className="user-avatar"
                               />

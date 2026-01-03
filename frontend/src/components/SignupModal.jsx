@@ -24,6 +24,7 @@ export default function SignupModal({ show, onHide, onSwitchToLogin }) {
   const [error, setError] = useState("");
 
   const { login } = useContext(AuthContext);
+  const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,7 +34,7 @@ export default function SignupModal({ show, onHide, onSwitchToLogin }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:5000/api/auth/pg_signup", {
+      const res = await fetch(`${API_BASE}/api/auth/pg_signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

@@ -26,7 +26,7 @@ import {
 import { AppContext } from "../context/AppContext";
 import { AuthContext } from "../context/AuthContext";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
 
 export default function PropertyDetail() {
   const { id } = useParams();
@@ -76,7 +76,7 @@ export default function PropertyDetail() {
       const method = property?.userInterested ? "delete" : "post";
       await axios({
         method,
-        url: `http://localhost:5000/api/properties/${id}/interested`,
+        url: `${API_BASE}/api/properties/${id}/interested`,
         headers: tokenHeader,
       });
     } catch (err) {
@@ -109,7 +109,7 @@ export default function PropertyDetail() {
     try {
       setLoadingRating(true);
       const res = await axios.post(
-        `${API_BASE}/properties/${id}/rate`,
+        `${API_BASE}/api/properties/${id}/rate`,
         {
           rating_clean: userRating.clean,
           rating_food: userRating.food,
@@ -219,7 +219,7 @@ export default function PropertyDetail() {
 
   const getImageUrl = (img) => {
     if (img.startsWith("/uploads")) {
-      return `http://localhost:5000${img}`;
+      return `${API_BASE}${img}`;
     }
     return img;
   };

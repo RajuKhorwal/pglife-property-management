@@ -20,7 +20,7 @@ export const AppProvider = ({ children }) => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
 
-  const API_BASE = "http://localhost:5000/api";
+  const API_BASE = "https://pglife-property-management-backend.onrender.com/api" || "http://localhost:5000/api";
 
   // Property detail states
   const [propertyDetail, setPropertyDetail] = useState(null);
