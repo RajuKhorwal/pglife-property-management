@@ -20,23 +20,23 @@ export const AuthProvider = ({ children }) => {
       : null
   );
   const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [authLoading, setAuthLoading] = useState(true);
+
 
   // Keep user logged in if token exists
   useEffect(() => {
-    if (token && !user) {
-      const storedUser = localStorage.getItem("user")
-        ? safeJSONParse(localStorage.getItem("user"))
-        : null;
+  const storedToken = localStorage.getItem("token");
+  const storedUser = localStorage.getItem("user");
 
-      if (storedUser) {
-        // Ensure avatar_url has full URL
-        if (storedUser.avatar_url && !storedUser.avatar_url.startsWith("http")) {
-          storedUser.avatar_url = `${process.env.REACT_APP_BACKEND_URL}${storedUser.avatar_url}`;
-        }
-        setUser(storedUser);
-      }
-    }
-  }, [token]);
+  if (storedToken && storedUser) {
+    const parsedUser = safeJSONParse(storedUser);
+    setToken(storedToken);
+    setUser(parsedUser);
+  }
+
+  setAuthLoading(false);
+}, []);
+
 
   // Login function
   const login = (userData, jwtToken = null) => {
@@ -78,6 +78,7 @@ export const AuthProvider = ({ children }) => {
         user,
         setUser,
         token,
+        authLoading,
         isAuthenticated: !!token,
         isAdmin: user?.isAdmin || false,
         login,

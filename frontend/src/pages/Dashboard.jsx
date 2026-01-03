@@ -9,7 +9,7 @@ import { AppContext } from "../context/AppContext";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user, setUser, token } = useContext(AuthContext);
+  const { user, setUser, token, authLoading } = useContext(AuthContext);
   const { interestedProperties, setInterestedProperties } = useContext(AppContext);
   const [showEdit, setShowEdit] = useState(false);
   const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
@@ -19,12 +19,12 @@ export default function Dashboard() {
     college_name: "",
   });
 
-  // Redirect to home if not logged in
   useEffect(() => {
-    if (!user || !token) {
+    if(!authLoading && (!user || !token)) {
       navigate("/");
     }
-  }, [user, token, navigate]);
+  }, [authLoading, user, token, navigate]);
+
 
   useEffect(() => {
     if (user) {
@@ -118,7 +118,12 @@ export default function Dashboard() {
     }
   };
 
+  if (authLoading) {
+    return <div style={{ padding: 50, textAlign: "center" }}>Loading...</div>;
+  }
+
   if (!user) return null;
+
 
   return (
     <>
