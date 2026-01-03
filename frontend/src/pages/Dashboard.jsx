@@ -592,7 +592,11 @@ export default function Dashboard() {
                   <div className="profile-avatar-container">
                     {user.avatar_url ? (
                       <img
-                        src={user?.avatar_url || "/img/fallback.png"}
+                        src={
+                          user?.avatar_url
+                            ? user.avatar_url
+                            : "/img/fallback.png"
+                        }
                         alt="Profile"
                         className="profile-avatar"
                       />
