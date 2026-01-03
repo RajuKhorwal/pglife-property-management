@@ -7,7 +7,6 @@ const User = require("../models/User");
 const router = express.Router();
 const uploadAvatar = require("../middleware/uploadAvatar");
 
-const upload = multer({ storage });
 
 // @route   PUT /api/users/:id
 // @desc    Update user profile
