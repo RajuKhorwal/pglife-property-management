@@ -1,13 +1,6 @@
-// frontend/src/pages/Dashboard.jsx - FIXED VERSION
+// frontend/src/pages/Dashboard.jsx
 import React, { useEffect, useState, useContext } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Button,
-  Breadcrumb,
-  Spinner,
-} from "react-bootstrap";
+import { Container, Row, Col, Button, Breadcrumb } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
 import {
   FaUser,
@@ -21,26 +14,20 @@ import {
   FaStarHalfAlt,
 } from "react-icons/fa";
 import { Modal, Form } from "react-bootstrap";
-import { toast } from "react-toastify";
 import { AuthContext } from "../context/AuthContext";
 import { AppContext } from "../context/AppContext";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user, setUser, login, token, authLoading } = useContext(AuthContext);
+  const { user, setUser, token, authLoading } = useContext(AuthContext);
   const { interestedProperties, setInterestedProperties } =
     useContext(AppContext);
   const [showEdit, setShowEdit] = useState(false);
-  const [saving, setSaving] = useState(false); // ✅ NEW: Track saving state
-  const [imagePreview, setImagePreview] = useState(null); // ✅ NEW: Preview uploaded image
-
   const API_BASE = process.env.REACT_APP_BACKEND_URL;
-
   const [form, setForm] = useState({
     full_name: "",
     phone: "",
     college_name: "",
-    avatarFile: null, // ✅ FIXED: Initialize as null
   });
 
   useEffect(() => {
@@ -60,7 +47,7 @@ export default function Dashboard() {
         })
         .catch(console.error);
     }
-  }, [user, token, setInterestedProperties, API_BASE]);
+  }, [user, token, setInterestedProperties]);
 
   useEffect(() => {
     if (user) {
@@ -68,138 +55,51 @@ export default function Dashboard() {
         full_name: user.full_name || "",
         phone: user.phone || "",
         college_name: user.college_name || "",
-        avatarFile: null,
       });
-      // ✅ NEW: Reset image preview when user changes
-      setImagePreview(null);
     }
   }, [user]);
 
-  // ✅ NEW: Handle file selection with preview
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image size should be less than 5MB");
-        return;
-      }
-
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        toast.error("Please select an image file");
-        return;
-      }
-
-      setForm({ ...form, avatarFile: file });
-
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // ✅ IMPROVED: Combined save with optimistic update and proper error handling
   const handleSave = async () => {
-    setSaving(true);
+    if (form.avatarFile) {
+      const formData = new FormData();
+      formData.append("avatar", form.avatarFile);
 
-    try {
-      let updatedUser = { ...user };
-
-      // ✅ OPTIMISTIC UPDATE: Show image immediately if file selected
-      if (form.avatarFile && imagePreview) {
-        updatedUser.avatar_url = imagePreview;
-        login(updatedUser, token);
-      }
-
-      // Upload avatar if file is selected
-      if (form.avatarFile) {
-        const formData = new FormData();
-        formData.append("avatar", form.avatarFile);
-
-        const avatarRes = await fetch(
-          `${API_BASE}/api/users/${user._id}/avatar`,
-          {
-            method: "PUT",
-            headers: { Authorization: `Bearer ${token}` },
-            body: formData,
-          }
-        );
-
-        if (!avatarRes.ok) {
-          throw new Error("Failed to upload avatar");
-        }
-
-        const avatarData = await avatarRes.json();
-
-        if (avatarData.success) {
-          // ✅ FIXED: Use the URL from response with cache busting
-          updatedUser.avatar_url = avatarData.user.avatar_url;
-        } else {
-          throw new Error(avatarData.message || "Avatar upload failed");
-        }
-      }
-
-      // Update profile information
-      const profileRes = await fetch(`${API_BASE}/api/users/${user._id}`, {
+      const res = await fetch(`${API_BASE}/api/users/${user._id}/avatar`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          full_name: form.full_name,
-          phone: form.phone,
-          college_name: form.college_name,
-        }),
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
       });
-
-      if (!profileRes.ok) {
-        throw new Error("Failed to update profile");
+      const data = await res.json();
+      if (data.success) {
+        setUser(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
-
-      const profileData = await profileRes.json();
-
-      if (profileData.success) {
-        // ✅ FIXED: Merge both avatar and profile updates
-        updatedUser = {
-          ...updatedUser,
-          ...profileData.user,
-          // Keep the avatar URL we set earlier if it exists
-          avatar_url: updatedUser.avatar_url || profileData.user.avatar_url,
-        };
-
-        // ✅ CRITICAL FIX: Use login() instead of setUser() to ensure proper URL formatting
-        login(updatedUser, token);
-
-        toast.success("Profile updated successfully! ✅");
-        setShowEdit(false);
-        setImagePreview(null);
-        setForm({ ...form, avatarFile: null });
-      } else {
-        throw new Error(profileData.message || "Profile update failed");
-      }
-    } catch (error) {
-      console.error("Error saving profile:", error);
-      toast.error(
-        error.message || "Failed to update profile. Please try again."
-      );
-
-      // ✅ ROLLBACK: Restore original user data on error
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        const originalUser = JSON.parse(storedUser);
-        login(originalUser, token);
-      }
-    } finally {
-      setSaving(false);
     }
+
+    // update text fields
+    const res = await fetch(`${API_BASE}/api/users/${user._id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        full_name: form.full_name,
+        phone: form.phone,
+        college_name: form.college_name,
+      }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      setUser(data.user);
+      localStorage.setItem("user", JSON.stringify(data.user));
+    }
+
+    setShowEdit(false);
   };
 
   const toggleInterest = async (propertyId) => {
+    const token = localStorage.getItem("token");
     try {
       const res = await fetch(
         `${API_BASE}/api/properties/${propertyId}/interested`,
@@ -216,40 +116,17 @@ export default function Dashboard() {
         setInterestedProperties((prev) =>
           prev.filter((p) => p && p._id !== propertyId)
         );
-        toast.success("Property removed from interests");
       } else {
-        toast.error(data.message || "Could not remove interest");
+        alert(data.message || "Could not remove interest");
       }
     } catch (err) {
       console.error("Error removing interest:", err);
-      toast.error("Something went wrong while removing interest");
+      alert("Something went wrong while removing interest");
     }
   };
 
-  // ✅ FIXED VERSION
-  const getAvatarUrl = () => {
-    if (imagePreview) return imagePreview;
-
-    if (!user?.avatar_url) return null;
-
-    if (user.avatar_url.startsWith("data:")) return user.avatar_url;
-
-    return user.avatar_url;
-  };
-
   if (authLoading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "400px",
-        }}
-      >
-        <Spinner animation="border" style={{ color: "#667eea" }} />
-      </div>
-    );
+    return <div style={{ padding: 50, textAlign: "center" }}>Loading...</div>;
   }
 
   if (!user) return null;
@@ -654,33 +531,11 @@ export default function Dashboard() {
             border-radius: 25px;
             padding: 10px 24px;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
           }
 
-          .edit-modal .btn-primary:hover:not(:disabled) {
+          .edit-modal .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-          }
-
-          .edit-modal .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-          }
-
-          .image-preview-container {
-            margin-top: 15px;
-            text-align: center;
-          }
-
-          .image-preview {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #667eea;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
           }
 
           @media (max-width: 768px) {
@@ -733,9 +588,13 @@ export default function Dashboard() {
               <Row>
                 <Col lg={3} md={4}>
                   <div className="profile-avatar-container">
-                    {getAvatarUrl() ? (
+                    {user.avatar_url ? (
                       <img
-                        src={getAvatarUrl()}
+                        src={
+                          user?.avatar_url
+                            ? user.avatar_url
+                            : "/img/fallback.png"
+                        }
                         alt="Profile"
                         className="profile-avatar"
                       />
@@ -888,10 +747,7 @@ export default function Dashboard() {
       {/* Edit Profile Modal */}
       <Modal
         show={showEdit}
-        onHide={() => {
-          setShowEdit(false);
-          setImagePreview(null);
-        }}
+        onHide={() => setShowEdit(false)}
         className="edit-modal"
         centered
       >
@@ -933,55 +789,19 @@ export default function Dashboard() {
               <Form.Control
                 type="file"
                 accept="image/*"
-                onChange={handleFileChange}
+                onChange={(e) =>
+                  setForm({ ...form, avatarFile: e.target.files[0] })
+                }
               />
-              {imagePreview && (
-                <div className="image-preview-container">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="image-preview"
-                  />
-                  <p
-                    style={{
-                      marginTop: "10px",
-                      color: "#6b7280",
-                      fontSize: "14px",
-                    }}
-                  >
-                    New profile picture preview
-                  </p>
-                </div>
-              )}
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setShowEdit(false);
-              setImagePreview(null);
-            }}
-            disabled={saving}
-          >
+          <Button variant="secondary" onClick={() => setShowEdit(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleSave} disabled={saving}>
-            {saving ? (
-              <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
-                />
-                Saving...
-              </>
-            ) : (
-              "Save Changes"
-            )}
+          <Button variant="primary" onClick={handleSave}>
+            Save Changes
           </Button>
         </Modal.Footer>
       </Modal>

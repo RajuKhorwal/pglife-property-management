@@ -6,7 +6,7 @@ const auth = require("../middleware/auth");
 const User = require("../models/User");
 const router = express.Router();
 const uploadAvatar = require("../middleware/uploadAvatar");
-const cloudinary = require("../config/cloudinary"); // ✅ ADD THIS
+
 
 // @route   PUT /api/users/:id
 // @desc    Update user profile
@@ -16,6 +16,7 @@ router.put("/:id", async (req, res) => {
     const { id } = req.params;
     const { full_name, phone, college_name } = req.body;
 
+    // find user by id
     const user = await User.findById(id);
     if (!user) {
       return res
@@ -36,7 +37,7 @@ router.put("/:id", async (req, res) => {
       user: {
         _id: user._id,
         full_name: user.full_name,
-        email: user.email,
+        email: user.email, // keep email non-editable
         phone: user.phone,
         college_name: user.college_name,
         avatar_url: user.avatar_url,
@@ -79,7 +80,6 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
-// ✅ IMPROVED: Avatar upload with old image deletion
 router.put("/:id/avatar", auth, uploadAvatar.single("avatar"), async (req, res) => {
   try {
     const { id } = req.params;
@@ -100,27 +100,10 @@ router.put("/:id/avatar", auth, uploadAvatar.single("avatar"), async (req, res) 
         .json({ success: false, message: "User not found" });
     }
 
-    // ✅ NEW: Delete old avatar from Cloudinary if exists
-    if (user.avatar_url) {
-      try {
-        // Extract public_id from Cloudinary URL
-        const urlParts = user.avatar_url.split('/');
-        const publicIdWithExtension = urlParts[urlParts.length - 1];
-        const publicId = `pglife/avatars/${publicIdWithExtension.split('.')[0]}`;
-        
-        await cloudinary.uploader.destroy(publicId);
-        console.log('Old avatar deleted:', publicId);
-      } catch (deleteError) {
-        console.error('Error deleting old avatar:', deleteError);
-        // Don't fail the request if old image deletion fails
-      }
-    }
-
-    // ✅ IMPROVED: Save avatar URL (Cloudinary returns full URL in req.file.path)
-    user.avatar_url = req.file.path;
+    // Save avatar URL
+    user.avatar_url = req.file.path; 
     await user.save();
 
-    // ✅ IMPROVED: Return response with cache-busting timestamp
     res.json({
       success: true,
       message: "Avatar updated successfully",
@@ -130,18 +113,13 @@ router.put("/:id/avatar", auth, uploadAvatar.single("avatar"), async (req, res) 
         email: user.email,
         phone: user.phone,
         college_name: user.college_name,
-        avatar_url: user.avatar_url, // This is already full Cloudinary URL
+        avatar_url: user.avatar_url,
         isAdmin: user.isAdmin,
       },
-      timestamp: Date.now(), // ✅ ADD: For cache busting
     });
   } catch (err) {
     console.error("Avatar upload error:", err);
-    res.status(500).json({ 
-      success: false, 
-      message: "Server error",
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
