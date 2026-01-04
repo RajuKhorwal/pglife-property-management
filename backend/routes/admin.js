@@ -360,7 +360,7 @@ router.get("/users", authAdmin, async (req, res) => {
     const usersWithFullAvatar = users.map((u) => {
       let avatar = u.avatar_url;
       if (avatar && !avatar.startsWith("http")) {
-        avatar = `${process.env.REACT_APP_BACKEND_URL}${avatar}`;
+        avatar = `${process.env.BACKEND_URL}${avatar}`;
       }
       return {
         ...u.toObject(),

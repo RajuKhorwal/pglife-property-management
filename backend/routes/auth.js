@@ -56,7 +56,7 @@ router.post("/pg_signup", async (req, res) => {
         college_name: newUser.college_name,
         isAdmin: newUser.isAdmin,
         avatar_url: newUser.avatar_url 
-          ? `${process.env.REACT_APP_BACKEND_URL}${newUser.avatar_url}`
+          ? `${process.env.BACKEND_URL}${newUser.avatar_url}`
           : null,
       },
     });
@@ -107,7 +107,7 @@ router.post("/pg_login", async (req, res) => {
         college_name: user.college_name,
         isAdmin: user.isAdmin,
         avatar_url: user.avatar_url 
-          ? `${process.env.REACT_APP_BACKEND_URL}${user.avatar_url}`
+          ? `${process.env.BACKEND_URL}${user.avatar_url}`
           : null,
       },
     });
