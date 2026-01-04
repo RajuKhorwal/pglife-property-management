@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../context/AuthContext";
 import { AppContext } from "../context/AppContext";
 
-const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_BACKEND_URL;
 
 export default function Booking() {
   const { id } = useParams(); // property ID

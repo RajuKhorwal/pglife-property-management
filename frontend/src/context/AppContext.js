@@ -20,7 +20,7 @@ export const AppProvider = ({ children }) => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
 
-  const API_BASE = "https://pglife-property-management-backend.onrender.com/api" || "http://localhost:5000/api";
+  const API_BASE = process.env.REACT_APP_BACKEND_URL;
 
   // Property detail states
   const [propertyDetail, setPropertyDetail] = useState(null);
@@ -30,7 +30,7 @@ export const AppProvider = ({ children }) => {
   const fetchPropertyDetail = async (id, tokenHeader) => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE}/properties/${id}`, {
+      const res = await axios.get(`${API_BASE}/api/properties/${id}`, {
         headers: tokenHeader,
       });
       setPropertyDetail({
@@ -40,7 +40,7 @@ export const AppProvider = ({ children }) => {
       });
       setAmenities(res.data.amenities || []);
       const testimonialRes = await axios.get(
-        `${API_BASE}/properties/${id}/testimonials`
+        `${API_BASE}/api/properties/${id}/testimonials`
       );
       setTestimonials(testimonialRes.data.testimonials || []);
     } catch (err) {
@@ -54,7 +54,7 @@ export const AppProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const res = await axios.get(`${API_BASE}/properties?city=${cityName}`, {
+      const res = await axios.get(`${API_BASE}/api/properties?city=${cityName}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 

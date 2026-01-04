@@ -7,7 +7,7 @@ import { FaBuilding, FaEdit, FaTrash, FaPlus, FaMapMarkerAlt, FaRupeeSign, FaIma
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_BACKEND_URL;
 
 export default function AdminProperties() {
   const { tokenHeader } = useContext(AuthContext);

@@ -6,7 +6,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext";
 
-const API_BASE = "https://pglife-property-management-backend.onrender.com/api/admin" || "http://localhost:5000/api/admin";
+const API_BASE = process.env.REACT_APP_BACKEND_URL;
 
 export default function AdminUsers() {
   const { tokenHeader } = useContext(AuthContext);
@@ -28,7 +28,7 @@ export default function AdminUsers() {
   // Fetch users
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/users`, { headers: tokenHeader });
+      const res = await axios.get(`${API_BASE}/api/admin/users`, { headers: tokenHeader });
       setUsers(res.data.users || []);
     } catch (err) {
       console.error(err);
@@ -46,7 +46,7 @@ export default function AdminUsers() {
   const handleDelete = async (userId) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
-      await axios.delete(`${API_BASE}/users/${userId}`, { headers: tokenHeader });
+      await axios.delete(`${API_BASE}/api/admin/users/${userId}`, { headers: tokenHeader });
       setUsers(users.filter((u) => u._id !== userId));
       toast.success("User deleted ✅");
     } catch (err) {
@@ -77,7 +77,7 @@ export default function AdminUsers() {
     }
     try {
       const res = await axios.put(
-        `${API_BASE}/users/${editingUser._id}`,
+        `${API_BASE}/api/admin/users/${editingUser._id}`,
         { full_name, phone, college_name, gender, avatar_url },
         { headers: tokenHeader }
       );

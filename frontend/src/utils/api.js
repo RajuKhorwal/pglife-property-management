@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000/api",
+  baseURL: process.env.REACT_APP_BACKEND_URL + "/api",
 });
 
 // no interceptor needed — we’ll pass tokenHeader from AuthContext

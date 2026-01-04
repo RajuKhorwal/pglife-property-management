@@ -38,7 +38,7 @@ export default function PropertyList() {
   } = useContext(AppContext);
 
   const { user, token, logoutOnExpire } = useContext(AuthContext);
-  const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
+  const API_BASE = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     if (!city) return;

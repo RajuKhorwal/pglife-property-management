@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_BASE = "https://pglife-property-management-backend.onrender.com/api/admin" || "http://localhost:5000/api/admin";
+const API_BASE = process.env.REACT_APP_BACKEND_URL;
 
 export default function AdminAmenities() {
   const { tokenHeader } = useContext(AuthContext);
@@ -33,8 +33,8 @@ export default function AdminAmenities() {
     setLoading(true);
     try {
       const [amenityRes, propertyRes] = await Promise.all([
-        axios.get(`${API_BASE}/amenities`, { headers: tokenHeader }),
-        axios.get(`${API_BASE}/properties`, { headers: tokenHeader }),
+        axios.get(`${API_BASE}/api/admin/amenities`, { headers: tokenHeader }),
+        axios.get(`${API_BASE}/api/admin/properties`, { headers: tokenHeader }),
       ]);
       setAmenities(amenityRes.data.amenities || []);
       setProperties(propertyRes.data.properties || []);
@@ -88,7 +88,7 @@ export default function AdminAmenities() {
       let res;
       if (editingAmenity) {
         res = await axios.put(
-          `${API_BASE}/amenities/${editingAmenity._id}`,
+          `${API_BASE}/api/admin/amenities/${editingAmenity._id}`,
           { propertyId, name, type, icon },
           { headers: tokenHeader }
         );
@@ -100,7 +100,7 @@ export default function AdminAmenities() {
         toast.success("Amenity updated ✅");
       } else {
         await axios.post(
-          `${API_BASE}/properties/${propertyId}/amenities`,
+          `${API_BASE}/api/admin/properties/${propertyId}/amenities`,
           { name, type, icon },
           { headers: tokenHeader }
         );
@@ -118,7 +118,7 @@ export default function AdminAmenities() {
     if (!window.confirm("Are you sure you want to delete this amenity?"))
       return;
     try {
-      await axios.delete(`${API_BASE}/amenities/${id}`, {
+      await axios.delete(`${API_BASE}/api/admin/amenities/${id}`, {
         headers: tokenHeader,
       });
       setAmenities(amenities.filter((a) => a._id !== id));

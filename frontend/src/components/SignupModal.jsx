@@ -24,7 +24,7 @@ export default function SignupModal({ show, onHide, onSwitchToLogin }) {
   const [error, setError] = useState("");
 
   const { login } = useContext(AuthContext);
-  const API_BASE = "https://pglife-property-management-backend.onrender.com" || "http://localhost:5000";
+  const API_BASE = process.env.REACT_APP_BACKEND_URL;
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
