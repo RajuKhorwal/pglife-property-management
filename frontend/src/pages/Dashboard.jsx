@@ -1,6 +1,13 @@
 // frontend/src/pages/Dashboard.jsx - FIXED VERSION
 import React, { useEffect, useState, useContext } from "react";
-import { Container, Row, Col, Button, Breadcrumb, Spinner } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Breadcrumb,
+  Spinner,
+} from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
 import {
   FaUser,
@@ -21,13 +28,14 @@ import { AppContext } from "../context/AppContext";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, setUser, login, token, authLoading } = useContext(AuthContext);
-  const { interestedProperties, setInterestedProperties } = useContext(AppContext);
+  const { interestedProperties, setInterestedProperties } =
+    useContext(AppContext);
   const [showEdit, setShowEdit] = useState(false);
   const [saving, setSaving] = useState(false); // ✅ NEW: Track saving state
   const [imagePreview, setImagePreview] = useState(null); // ✅ NEW: Preview uploaded image
-  
+
   const API_BASE = process.env.REACT_APP_BACKEND_URL;
-  
+
   const [form, setForm] = useState({
     full_name: "",
     phone: "",
@@ -76,15 +84,15 @@ export default function Dashboard() {
         toast.error("Image size should be less than 5MB");
         return;
       }
-      
+
       // Validate file type
-      if (!file.type.startsWith('image/')) {
+      if (!file.type.startsWith("image/")) {
         toast.error("Please select an image file");
         return;
       }
 
       setForm({ ...form, avatarFile: file });
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -97,14 +105,14 @@ export default function Dashboard() {
   // ✅ IMPROVED: Combined save with optimistic update and proper error handling
   const handleSave = async () => {
     setSaving(true);
-    
+
     try {
       let updatedUser = { ...user };
-      
+
       // ✅ OPTIMISTIC UPDATE: Show image immediately if file selected
       if (form.avatarFile && imagePreview) {
         updatedUser.avatar_url = imagePreview;
-        setUser(updatedUser);
+        login(updatedUser, token);
       }
 
       // Upload avatar if file is selected
@@ -112,21 +120,24 @@ export default function Dashboard() {
         const formData = new FormData();
         formData.append("avatar", form.avatarFile);
 
-        const avatarRes = await fetch(`${API_BASE}/api/users/${user._id}/avatar`, {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        });
+        const avatarRes = await fetch(
+          `${API_BASE}/api/users/${user._id}/avatar`,
+          {
+            method: "PUT",
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData,
+          }
+        );
 
         if (!avatarRes.ok) {
           throw new Error("Failed to upload avatar");
         }
 
         const avatarData = await avatarRes.json();
-        
+
         if (avatarData.success) {
           // ✅ FIXED: Use the URL from response with cache busting
-          updatedUser.avatar_url = `${avatarData.user.avatar_url}?t=${Date.now()}`;
+          updatedUser.avatar_url = avatarData.user.avatar_url;
         } else {
           throw new Error(avatarData.message || "Avatar upload failed");
         }
@@ -151,7 +162,7 @@ export default function Dashboard() {
       }
 
       const profileData = await profileRes.json();
-      
+
       if (profileData.success) {
         // ✅ FIXED: Merge both avatar and profile updates
         updatedUser = {
@@ -163,7 +174,7 @@ export default function Dashboard() {
 
         // ✅ CRITICAL FIX: Use login() instead of setUser() to ensure proper URL formatting
         login(updatedUser, token);
-        
+
         toast.success("Profile updated successfully! ✅");
         setShowEdit(false);
         setImagePreview(null);
@@ -173,13 +184,15 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Error saving profile:", error);
-      toast.error(error.message || "Failed to update profile. Please try again.");
-      
+      toast.error(
+        error.message || "Failed to update profile. Please try again."
+      );
+
       // ✅ ROLLBACK: Restore original user data on error
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         const originalUser = JSON.parse(storedUser);
-        setUser(originalUser);
+        login(originalUser, token);
       }
     } finally {
       setSaving(false);
@@ -213,32 +226,28 @@ export default function Dashboard() {
     }
   };
 
- // ✅ FIXED VERSION
-const getAvatarUrl = () => {
-  // If preview exists (base64), return it directly WITHOUT cache-busting
-  if (imagePreview) return imagePreview;
-  
-  if (!user?.avatar_url) return null;
-  
-  const url = user.avatar_url;
-  
-  // DON'T add cache-busting to data URLs (base64)
-  if (url.startsWith('data:')) return url;
-  
-  // Only add cache-busting to regular URLs
-  const separator = url.includes('?') ? '&' : '?';
-  return `${url}${separator}t=${Date.now()}`;
-};
+  // ✅ FIXED VERSION
+  const getAvatarUrl = () => {
+    if (imagePreview) return imagePreview;
+
+    if (!user?.avatar_url) return null;
+
+    if (user.avatar_url.startsWith("data:")) return user.avatar_url;
+
+    return user.avatar_url;
+  };
 
   if (authLoading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '400px' 
-      }}>
-        <Spinner animation="border" style={{ color: '#667eea' }} />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "400px",
+        }}
+      >
+        <Spinner animation="border" style={{ color: "#667eea" }} />
       </div>
     );
   }
@@ -729,7 +738,6 @@ const getAvatarUrl = () => {
                         src={getAvatarUrl()}
                         alt="Profile"
                         className="profile-avatar"
-                        key={getAvatarUrl()} // Force re-render on URL change
                       />
                     ) : (
                       <div className="profile-avatar">
@@ -934,7 +942,13 @@ const getAvatarUrl = () => {
                     alt="Preview"
                     className="image-preview"
                   />
-                  <p style={{ marginTop: '10px', color: '#6b7280', fontSize: '14px' }}>
+                  <p
+                    style={{
+                      marginTop: "10px",
+                      color: "#6b7280",
+                      fontSize: "14px",
+                    }}
+                  >
                     New profile picture preview
                   </p>
                 </div>
@@ -943,8 +957,8 @@ const getAvatarUrl = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={() => {
               setShowEdit(false);
               setImagePreview(null);
@@ -953,11 +967,7 @@ const getAvatarUrl = () => {
           >
             Cancel
           </Button>
-          <Button 
-            variant="primary" 
-            onClick={handleSave}
-            disabled={saving}
-          >
+          <Button variant="primary" onClick={handleSave} disabled={saving}>
             {saving ? (
               <>
                 <Spinner
@@ -970,7 +980,7 @@ const getAvatarUrl = () => {
                 Saving...
               </>
             ) : (
-              'Save Changes'
+              "Save Changes"
             )}
           </Button>
         </Modal.Footer>
