@@ -213,16 +213,22 @@ export default function Dashboard() {
     }
   };
 
-  // ✅ NEW: Function to get avatar URL with cache busting
-  const getAvatarUrl = () => {
-    if (imagePreview) return imagePreview; // Show preview if exists
-    if (!user?.avatar_url) return null;
-    
-    // Add cache busting parameter to force reload
-    const url = user.avatar_url;
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}t=${Date.now()}`;
-  };
+ // ✅ FIXED VERSION
+const getAvatarUrl = () => {
+  // If preview exists (base64), return it directly WITHOUT cache-busting
+  if (imagePreview) return imagePreview;
+  
+  if (!user?.avatar_url) return null;
+  
+  const url = user.avatar_url;
+  
+  // DON'T add cache-busting to data URLs (base64)
+  if (url.startsWith('data:')) return url;
+  
+  // Only add cache-busting to regular URLs
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}t=${Date.now()}`;
+};
 
   if (authLoading) {
     return (
